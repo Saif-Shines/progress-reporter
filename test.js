@@ -1,7 +1,20 @@
 #!/usr/bin/env node
 
 require('dotenv').config();
+const readline = require('readline');
 const { getOpenPRs, getMergedPRs } = require('./src/github-slack-integration');
+const { generateExecutiveSummary } = require('./src/claude-integration');
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+function question(prompt) {
+  return new Promise((resolve) => {
+    rl.question(prompt, resolve);
+  });
+}
 
 async function testGitHubIntegration() {
   console.log('🧪 Testing GitHub Integration...\n');
@@ -12,35 +25,35 @@ async function testGitHubIntegration() {
     const openPRs = await getOpenPRs();
     console.log(`Found ${openPRs.length} open PR(s)`);
 
-    if (openPRs.length > 0) {
-      console.log('\nOpen PRs:');
-      openPRs.forEach((pr, index) => {
-        console.log(`${index + 1}. ${pr.title}`);
-        console.log(`   Repo: ${pr.repo} (#${pr.number})`);
-        console.log(`   Reviewers: ${pr.reviewers.join(', ') || 'None'}`);
-        console.log(
-          `   Requested: ${pr.requestedReviewers.join(', ') || 'None'}`
-        );
-        console.log('');
-      });
-    }
-
     // Test merged PRs
     console.log('📊 Fetching merged PRs from last 2 weeks...');
     const mergedPRs = await getMergedPRs(2);
     console.log(`Found ${mergedPRs.length} merged PR(s) in last 2 weeks`);
 
-    if (mergedPRs.length > 0) {
-      console.log('\nMerged PRs:');
-      mergedPRs.forEach((pr, index) => {
-        console.log(`${index + 1}. ${pr.title}`);
-        console.log(`   Repo: ${pr.repo} (#${pr.number})`);
-        console.log(`   Merged: ${pr.merged_at}`);
-        console.log(
-          `   Changes: +${pr.additions} -${pr.deletions} (${pr.changed_files} files)`
-        );
-        console.log('');
-      });
+    // Ask user for output preference
+    console.log('\n📝 Choose your output format:');
+    console.log('1. Regular detailed output (current format)');
+    console.log('2. Claude AI executive summary');
+
+    const choice = await question('\nEnter your choice (1 or 2): ');
+
+    if (choice === '2') {
+      // Generate Claude summary
+      console.log('\n🤖 Generating Claude AI executive summary...');
+      try {
+        const summary = await generateExecutiveSummary(openPRs, mergedPRs, 2);
+        console.log('\n📊 EXECUTIVE SUMMARY:');
+        console.log('='.repeat(50));
+        console.log(summary);
+        console.log('='.repeat(50));
+      } catch (error) {
+        console.error('❌ Error generating Claude summary:', error.message);
+        console.log('\nFalling back to regular output...\n');
+        displayRegularOutput(openPRs, mergedPRs);
+      }
+    } else {
+      // Display regular output
+      displayRegularOutput(openPRs, mergedPRs);
     }
 
     console.log('✅ GitHub integration test completed successfully!');
@@ -52,6 +65,38 @@ async function testGitHubIntegration() {
     );
     console.error('2. Your GitHub token has the correct permissions');
     console.error('3. Your GitHub username is correct');
+    if (choice === '2') {
+      console.error(
+        '4. For Claude summary: Set CLAUDE_API_KEY in your .env file'
+      );
+    }
+  } finally {
+    rl.close();
+  }
+}
+
+function displayRegularOutput(openPRs, mergedPRs) {
+  if (openPRs.length > 0) {
+    console.log('\nOpen PRs:');
+    openPRs.forEach((pr, index) => {
+      console.log(`${index + 1}. ${pr.title}`);
+      console.log(`   Repo: ${pr.repo} (#${pr.number})`);
+      console.log(`   Reviewers: ${pr.reviewers.join(', ') || 'None'}`);
+      console.log(
+        `   Requested: ${pr.requestedReviewers.join(', ') || 'None'}`
+      );
+      console.log('');
+    });
+  }
+
+  if (mergedPRs.length > 0) {
+    console.log('\nMerged PRs:');
+    mergedPRs.forEach((pr, index) => {
+      console.log(`${index + 1}. ${pr.title}`);
+      console.log(`   Repo: ${pr.repo} (#${pr.number})`);
+      console.log(`   Merged: ${pr.merged_at}`);
+      console.log('');
+    });
   }
 }
 

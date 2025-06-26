@@ -18,12 +18,20 @@ A Node.js script that connects to GitHub and Slack to track your Pull Requests a
 - Shows additions, deletions, and files changed
 - Sends a comprehensive report to Slack
 
+### Scenario #3: AI-Powered Executive Summary 🆕
+
+- Uses Claude AI to generate professional executive summaries
+- Analyzes both open and merged PRs
+- Creates business-friendly status reports
+- Sends concise, actionable insights to Slack
+
 ## Prerequisites
 
 - Node.js (v14 or higher)
 - GitHub Personal Access Token
 - Slack Bot Token
 - Slack Channel ID
+- Claude API Key (optional, for AI-powered summaries)
 
 ## Quick Setup
 
@@ -133,12 +141,26 @@ npm start all
 npm start all --weeks 4
 ```
 
+### Generate AI-Powered Executive Summary
+
+```bash
+npm start executive-summary
+```
+
+### Generate Executive Summary (Custom weeks)
+
+```bash
+npm start executive-summary --weeks 3
+```
+
 ## Command Line Options
 
 - `open-prs`: Check for open PRs waiting for reviews
 - `merged-prs`: Check merged PRs from recent weeks
   - `-w, --weeks <number>`: Number of weeks to look back (1-4, default: 2)
 - `all`: Run both open PRs and merged PRs checks
+  - `-w, --weeks <number>`: Number of weeks for merged PRs (1-4, default: 2)
+- `executive-summary`: Generate AI-powered executive summary
   - `-w, --weeks <number>`: Number of weeks for merged PRs (1-4, default: 2)
 
 ## Example Output
@@ -168,13 +190,12 @@ Fixes the navigation menu not working properly on mobile devices...
 
 ```
 📊 Weekly Summary - Last 2 Week(s)
-3 PR(s) merged • 450 additions • 120 deletions • 15 files changed
+3 PR(s) merged
 
 ---
 
 Implement dark mode toggle
 Repo: myorg/myapp (#120) • Merged: Dec 15, 2024
-Changes: +200 -50 (8 files)
 
 Adds a dark mode toggle in the settings panel with theme persistence...
 
@@ -182,9 +203,27 @@ Adds a dark mode toggle in the settings panel with theme persistence...
 
 Update API documentation
 Repo: myorg/myapp (#121) • Merged: Dec 12, 2024
-Changes: +150 -30 (3 files)
 
 Updates the API documentation with new endpoints and examples...
+```
+
+### Executive Summary Message
+
+```
+📊 Executive Summary
+Status Overview - Last 2 Week(s)
+• Open PRs: 2
+• Merged PRs: 3
+
+---
+
+Over the past two weeks, significant progress has been made on the authentication system and mobile navigation improvements. Three pull requests were successfully merged, including the implementation of OAuth2 authentication and mobile navigation bug fixes.
+
+Currently, there are two open pull requests awaiting review: a user authentication feature that has been assigned to john.doe and jane.smith, and a mobile navigation fix that still needs reviewer assignment. The authentication feature appears to be a substantial addition requiring careful review.
+
+**Action Items:**
+- The mobile navigation PR needs reviewer assignment to move forward
+- Consider prioritizing the authentication feature review given its complexity
 ```
 
 ## Configuration
@@ -197,6 +236,7 @@ Updates the API documentation with new endpoints and examples...
 | `GITHUB_USERNAME`    | Your GitHub username                      | Yes      |
 | `SLACK_BOT_TOKEN`    | Slack Bot User OAuth Token                | Yes      |
 | `SLACK_CHANNEL_ID`   | Slack Channel ID to post messages         | Yes      |
+| `CLAUDE_API_KEY`     | Claude API Key for AI summaries           | No       |
 | `DEFAULT_WEEKS_BACK` | Default weeks for merged PRs (default: 2) | No       |
 | `MAX_WEEKS_BACK`     | Maximum weeks allowed (default: 4)        | No       |
 
@@ -211,6 +251,8 @@ Updates the API documentation with new endpoints and examples...
 3. **Repository Access**: Make sure your GitHub token has access to all repositories you want to track.
 
 4. **Channel ID Format**: Slack channel IDs should start with `C` (public channels) or `G` (private channels).
+
+5. **Claude API Error**: If you get Claude API errors, make sure your API key is valid and has sufficient credits.
 
 ### Debug Mode
 

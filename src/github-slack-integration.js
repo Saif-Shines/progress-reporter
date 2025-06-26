@@ -1,6 +1,10 @@
 const { Octokit } = require('@octokit/rest');
 const { WebClient } = require('@slack/web-api');
 const moment = require('moment');
+const {
+  generateExecutiveSummary,
+  createExecutiveSummaryMessage,
+} = require('./claude-integration');
 
 // Initialize GitHub client
 const octokit = new Octokit({
@@ -127,9 +131,6 @@ async function getMergedPRs(weeksBack) {
             repo: repo.full_name,
             number: pr.number,
             merged_at: pr.merged_at,
-            additions: pr.additions,
-            deletions: pr.deletions,
-            changed_files: pr.changed_files,
           });
         }
       } catch (error) {
@@ -238,10 +239,6 @@ function createMergedPRsMessage(mergedPRs, weeksBack) {
     };
   }
 
-  const totalAdditions = mergedPRs.reduce((sum, pr) => sum + pr.additions, 0);
-  const totalDeletions = mergedPRs.reduce((sum, pr) => sum + pr.deletions, 0);
-  const totalFiles = mergedPRs.reduce((sum, pr) => sum + pr.changed_files, 0);
-
   const blocks = [
     {
       type: 'header',
@@ -255,7 +252,7 @@ function createMergedPRsMessage(mergedPRs, weeksBack) {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*${mergedPRs.length} PR(s) merged* • *${totalAdditions} additions* • *${totalDeletions} deletions* • *${totalFiles} files changed*`,
+        text: `*${mergedPRs.length} PR(s) merged*`,
       },
     },
     {
@@ -272,9 +269,7 @@ function createMergedPRsMessage(mergedPRs, weeksBack) {
         type: 'mrkdwn',
         text: `*<${pr.url}|${pr.title}>*\n*Repo:* ${pr.repo} (#${
           pr.number
-        }) • *Merged:* ${mergedDate}\n*Changes:* +${pr.additions} -${
-          pr.deletions
-        } (${pr.changed_files} files)\n\n${pr.description.substring(0, 200)}${
+        }) • *Merged:* ${mergedDate}\n\n${pr.description.substring(0, 200)}${
           pr.description.length > 200 ? '...' : ''
         }`,
       },
@@ -333,9 +328,40 @@ async function checkMergedPRs(weeksBack = 2) {
   await sendSlackMessage(message);
 }
 
+/**
+ * Generate and send executive summary to Slack
+ */
+async function generateAndSendExecutiveSummary(weeksBack = 2) {
+  try {
+    console.log('🤖 Generating executive summary with Claude AI...');
+
+    const openPRs = await getOpenPRs();
+    const mergedPRs = await getMergedPRs(weeksBack);
+
+    const summary = await generateExecutiveSummary(
+      openPRs,
+      mergedPRs,
+      weeksBack
+    );
+    const message = createExecutiveSummaryMessage(
+      summary,
+      openPRs,
+      mergedPRs,
+      weeksBack
+    );
+
+    await sendSlackMessage(message);
+    console.log('✅ Executive summary sent to Slack successfully!');
+  } catch (error) {
+    console.error('❌ Error generating executive summary:', error.message);
+    throw error;
+  }
+}
+
 module.exports = {
   checkOpenPRs,
   checkMergedPRs,
+  generateAndSendExecutiveSummary,
   getOpenPRs,
   getMergedPRs,
   sendSlackMessage,

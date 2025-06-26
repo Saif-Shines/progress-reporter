@@ -21,6 +21,7 @@
   "dependencies": {
     "@octokit/rest": "^20.0.2",
     "@slack/web-api": "^6.10.0",
+    "@anthropic-ai/sdk": "^0.18.0",
     "dotenv": "^16.3.1",
     "commander": "^11.1.0",
     "chalk": "^4.1.2",

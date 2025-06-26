@@ -6,6 +6,7 @@ const chalk = require('chalk');
 const {
   checkOpenPRs,
   checkMergedPRs,
+  generateAndSendExecutiveSummary,
 } = require('./src/github-slack-integration');
 
 const program = new Command();
@@ -87,6 +88,38 @@ program
       console.log(chalk.green('\n🎉 All checks completed successfully!'));
     } catch (error) {
       console.error(chalk.red('❌ Error running checks:'), error.message);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('executive-summary')
+  .description('Generate and send an AI-powered executive summary to Slack')
+  .option(
+    '-w, --weeks <number>',
+    'Number of weeks to look back for merged PRs (default: 2, max: 4)',
+    '2'
+  )
+  .action(async (options) => {
+    try {
+      const weeks = parseInt(options.weeks);
+      if (weeks < 1 || weeks > 4) {
+        console.error(chalk.red('❌ Weeks must be between 1 and 4'));
+        process.exit(1);
+      }
+
+      console.log(
+        chalk.blue(
+          `🤖 Generating executive summary for the last ${weeks} week(s)...`
+        )
+      );
+      await generateAndSendExecutiveSummary(weeks);
+      console.log(chalk.green('✅ Executive summary sent to Slack!'));
+    } catch (error) {
+      console.error(
+        chalk.red('❌ Error generating executive summary:'),
+        error.message
+      );
       process.exit(1);
     }
   });

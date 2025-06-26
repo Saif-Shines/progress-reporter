@@ -55,6 +55,14 @@ async function setup() {
   const slackToken = await question('Slack Bot Token (xoxb-...): ');
   const slackChannel = await question('Slack Channel ID (C... or G...): ');
 
+  console.log('\n📋 Claude AI Configuration (Optional):');
+  console.log('1. Get your Claude API key from https://console.anthropic.com/');
+  console.log('2. This enables AI-powered executive summaries\n');
+
+  const claudeApiKey = await question(
+    'Claude API Key (optional, press Enter to skip): '
+  );
+
   console.log('\n📋 Optional Configuration:');
   const defaultWeeks =
     (await question('Default weeks for merged PRs (1-4, default: 2): ')) || '2';
@@ -69,6 +77,9 @@ GITHUB_USERNAME=${githubUsername}
 # Slack Configuration
 SLACK_BOT_TOKEN=${slackToken}
 SLACK_CHANNEL_ID=${slackChannel}
+
+# Claude AI Configuration
+CLAUDE_API_KEY=${claudeApiKey || ''}
 
 # Configuration
 DEFAULT_WEEKS_BACK=${defaultWeeks}
