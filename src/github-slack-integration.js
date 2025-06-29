@@ -344,8 +344,72 @@ async function checkMergedPRs(weeksBack = 1) {
 }
 
 /**
+ * Create a fallback message when Claude AI fails
+ * This provides a simple summary without AI processing, matching the AI format
+ */
+function createFallbackExecutiveSummaryMessage(openPRs, mergedPRs, weeksBack) {
+  // Create a simple text summary similar to what Claude would generate
+  let summaryText = '';
+
+  if (openPRs.length === 0) {
+    summaryText = '🎉 Great news! You have no open PRs waiting for reviews.';
+  } else {
+    summaryText = `Here are open PR's last week. It's waiting on following reviews:\n\n`;
+
+    for (const pr of openPRs) {
+      const reviewersText =
+        pr.reviewers.length > 0 ? `Reviewers: ${pr.reviewers.join(', ')}` : '';
+      const requestedReviewersText =
+        pr.requestedReviewers.length > 0
+          ? `Requested: ${pr.requestedReviewers.join(', ')}`
+          : '';
+
+      summaryText += `• <${pr.url}|${pr.title}> (${pr.repo} #${pr.number})\n`;
+      if (reviewersText) summaryText += `  ${reviewersText}\n`;
+      if (requestedReviewersText)
+        summaryText += `  ${requestedReviewersText}\n`;
+      summaryText += '\n';
+    }
+  }
+
+  const blocks = [
+    {
+      type: 'header',
+      text: {
+        type: 'plain_text',
+        text: '📊 Executive Summary',
+        emoji: true,
+      },
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `*Status Overview - Last ${weeksBack} Week(s)*\n• Open PRs: ${openPRs.length}\n• Merged PRs: ${mergedPRs.length}`,
+      },
+    },
+    {
+      type: 'divider',
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: summaryText,
+      },
+    },
+  ];
+
+  return {
+    text: `Executive Summary: ${openPRs.length} open PRs, ${mergedPRs.length} merged PRs in last ${weeksBack} weeks`,
+    blocks: blocks,
+  };
+}
+
+/**
  * Generate and send an AI-powered executive summary to Slack
  * This uses Claude AI to create a simple summary of your PR status and sends it to Slack
+ * Falls back to direct message if Claude AI fails
  */
 async function generateAndSendExecutiveSummary(weeksBack = 1) {
   try {
@@ -354,22 +418,41 @@ async function generateAndSendExecutiveSummary(weeksBack = 1) {
     const openPRs = await getOpenPRs();
     const mergedPRs = await getMergedPRs(weeksBack);
 
-    const summary = await generateExecutiveSummary(
-      openPRs,
-      mergedPRs,
-      weeksBack
-    );
-    const message = createExecutiveSummaryMessage(
-      summary,
-      openPRs,
-      mergedPRs,
-      weeksBack
-    );
+    try {
+      const summary = await generateExecutiveSummary(
+        openPRs,
+        mergedPRs,
+        weeksBack
+      );
+      const message = createExecutiveSummaryMessage(
+        summary,
+        openPRs,
+        mergedPRs,
+        weeksBack
+      );
 
-    await sendSlackMessage(message);
-    console.log('✅ Executive summary sent to Slack successfully!');
+      await sendSlackMessage(message);
+      console.log(
+        '✅ AI-powered executive summary sent to Slack successfully!'
+      );
+    } catch (claudeError) {
+      console.warn(
+        '⚠️ Claude AI failed, falling back to direct message:',
+        claudeError.message
+      );
+
+      // Fallback to direct message without AI
+      const fallbackMessage = createFallbackExecutiveSummaryMessage(
+        openPRs,
+        mergedPRs,
+        weeksBack
+      );
+
+      await sendSlackMessage(fallbackMessage);
+      console.log('✅ Fallback executive summary sent to Slack successfully!');
+    }
   } catch (error) {
-    console.error('❌ Error generating executive summary:', error.message);
+    console.error('❌ Error in executive summary process:', error.message);
     throw error;
   }
 }
