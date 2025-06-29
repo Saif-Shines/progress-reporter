@@ -31,9 +31,9 @@ async function generateExecutiveSummary(openPRs, mergedPRs, weeksBack) {
       weeksBack: weeksBack,
     };
 
-    const prompt = `You are an AI assistant helping to create executive summaries of GitHub Pull Request status updates.
+    const prompt = `You are an AI assistant helping to create simple, concise summaries of GitHub Pull Request status updates.
 
-Please analyze the following GitHub data and create a concise, professional executive summary that would be suitable for a business context.
+Please analyze the following GitHub data and create a very brief summary focusing only on open PRs from the last week.
 
 **Data to analyze:**
 - Open PRs waiting for review: ${summaryData.openPRs.length}
@@ -51,29 +51,22 @@ ${summaryData.openPRs
       ? `Requested: ${pr.requestedReviewers.join(', ')}`
       : ''
   }
-  Description: ${pr.description.substring(0, 150)}${
-      pr.description.length > 150 ? '...' : ''
-    }`
-  )
-  .join('\n')}
-
-**Merged PRs Details:**
-${summaryData.mergedPRs
-  .map(
-    (pr) => `- ${pr.title} (${pr.repo} #${pr.number}) - Merged: ${pr.merged_at}
-  Description: ${pr.description.substring(0, 150)}${
-      pr.description.length > 150 ? '...' : ''
-    }`
+  PR Link: <https://github.com/${pr.repo}/pull/${pr.number}|${pr.title}>`
   )
   .join('\n')}
 
 **Instructions:**
-1. Create a casual executive summary (1 paragraph)
-2. List the data you got in bullet points. 
-3. Use bullet points for easy scannability
-4. Leave links to the PRs for easy access (don't pollute)
+1. Create a very simple, casual summary (1-2 sentences max)
+2. Focus ONLY on open PRs that are waiting for reviews
+3. Use this exact format: "Here are open PR's last week. It's waiting on following reviews:"
+4. List each open PR with a brief title, reviewer information, and include the PR link
+5. For each PR, show who has reviewed and who still needs to review
+6. Use Slack's hyperlink format for all PR links: <url|text>
+7. Do NOT use [text](url) format. Only use <url|text> for links.
+8. Keep it extremely concise and scannable
+9. Use bullet points for easy reading
 
-**Format the response as a clean executive summary suitable for Slack.**`;
+**Format the response as a simple list with PR links and reviewer details, using Slack's <url|text> format for all links.**`;
 
     const response = await claude.messages.create({
       model: 'claude-3-5-haiku-latest',

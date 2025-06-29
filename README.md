@@ -1,79 +1,75 @@
 # Weekly Updates - GitHub PR Tracker
 
-A Node.js script that connects to GitHub and Slack to track your Pull Requests and send automated updates.
+A simple Node.js tool that connects to GitHub and Slack to track your Pull Requests and send automated updates.
 
-## Features
+## What this tool does
 
-### Scenario #1: Open PRs Tracker
+### Track open PRs waiting for reviews
 
-- Fetches all open PRs you've created across your repositories
-- Identifies reviewers and requested reviewers
-- Sends a formatted Slack message with PR details
-- Shows who is waiting to review your code
+- Finds all your open PRs across repositories
+- Shows who has reviewed and who still needs to review
+- Sends a formatted message to Slack with PR details
+- Helps you see who is waiting to review your code
 
-### Scenario #2: Merged PRs Summary
+### Track merged PRs from recent weeks
 
-- Tracks merged PRs from the last 2-4 weeks (configurable)
-- Provides a weekly summary with statistics
-- Shows additions, deletions, and files changed
-- Sends a comprehensive report to Slack
+- Shows PRs merged in the last 1-4 weeks (you choose)
+- Provides a simple weekly summary
+- Sends a clean report to Slack
 
-### Scenario #3: AI-Powered Executive Summary 🆕
+### Generate AI-powered summaries
 
-- Uses Claude AI to generate professional executive summaries
-- Analyzes both open and merged PRs
-- Creates business-friendly status reports
-- Sends concise, actionable insights to Slack
+- Uses Claude AI to create simple, actionable summaries
+- Focuses on open PRs that need attention
+- Creates easy-to-scan bullet points with direct PR links
 
-## Prerequisites
+## What you need to get started
 
-- Node.js (v14 or higher)
+- Node.js (version 14 or higher)
 - GitHub Personal Access Token
 - Slack Bot Token
 - Slack Channel ID
-- Claude API Key (optional, for AI-powered summaries)
+- Claude API Key (optional, for AI summaries)
 
-## Quick Setup
+## Quick setup (5 minutes)
 
-### 1. Install Dependencies
+### 1. Install the tool
 
 ```bash
 npm install
 ```
 
-### 2. Run Interactive Setup
+### 2. Run the setup wizard
 
 ```bash
 npm run setup
 ```
 
-This will guide you through the configuration process and create your `.env` file automatically.
+This will guide you through all the configuration and create your settings file automatically.
 
-### 3. Test the Integration
+### 3. Test your setup
 
 ```bash
 npm test
 ```
 
-This will test your GitHub integration without sending any Slack messages.
+This tests your GitHub connection without sending any Slack messages.
 
-## Manual Setup
+## Manual setup (if you prefer)
 
-If you prefer to configure manually, follow these steps:
-
-### 1. Install Dependencies
+### 1. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Environment Configuration
-
-Copy the example environment file and configure your settings:
+### 2. Create your settings file
 
 ```bash
 cp env.example .env
 ```
+
+### 3. Add your configuration
 
 Edit `.env` with your actual values:
 
@@ -86,94 +82,89 @@ GITHUB_USERNAME=your_github_username
 SLACK_BOT_TOKEN=xoxb-your-slack-bot-token
 SLACK_CHANNEL_ID=your-slack-channel-id
 
+# Claude AI Configuration (optional)
+CLAUDE_API_KEY=your_claude_api_key
+
 # Configuration
-DEFAULT_WEEKS_BACK=2
+DEFAULT_WEEKS_BACK=1
 MAX_WEEKS_BACK=4
 ```
 
-### 3. GitHub Setup
+### 4. Get your GitHub token
 
 1. Go to GitHub Settings → Developer settings → Personal access tokens
-2. Generate a new token with the following scopes:
+2. Generate a new token with these permissions:
    - `repo` (Full control of private repositories)
    - `read:user` (Read access to user profile)
 3. Copy the token to your `.env` file
 
-### 4. Slack Setup
+### 5. Set up Slack
 
 1. Create a new Slack App at https://api.slack.com/apps
-2. Add the following OAuth scopes:
+2. Add these permissions:
    - `chat:write` (Send messages as the app)
    - `chat:write.public` (Send messages to public channels)
 3. Install the app to your workspace
 4. Copy the Bot User OAuth Token to your `.env` file
 5. Get your channel ID (right-click channel → Copy link → extract the ID)
 
-## Usage
+## How to use the tool
 
-### Check Open PRs
+### Check open PRs waiting for reviews
 
 ```bash
 npm start open-prs
 ```
 
-### Check Merged PRs (Last 2 weeks)
+### Check merged PRs from last week
 
 ```bash
 npm start merged-prs
 ```
 
-### Check Merged PRs (Custom weeks)
+### Check merged PRs from custom time period
 
 ```bash
 npm start merged-prs --weeks 3
 ```
 
-### Run Both Checks
+### Run both checks at once
 
 ```bash
 npm start all
 ```
 
-### Run Both Checks with Custom Weeks
-
-```bash
-npm start all --weeks 4
-```
-
-### Generate AI-Powered Executive Summary
+### Generate AI summary (last week only)
 
 ```bash
 npm start executive-summary
 ```
 
-### Generate Executive Summary (Custom weeks)
+### Generate AI summary for custom time period
 
 ```bash
 npm start executive-summary --weeks 3
 ```
 
-## Command Line Options
+## Available commands
 
-- `open-prs`: Check for open PRs waiting for reviews
-- `merged-prs`: Check merged PRs from recent weeks
-  - `-w, --weeks <number>`: Number of weeks to look back (1-4, default: 2)
-- `all`: Run both open PRs and merged PRs checks
-  - `-w, --weeks <number>`: Number of weeks for merged PRs (1-4, default: 2)
-- `executive-summary`: Generate AI-powered executive summary
-  - `-w, --weeks <number>`: Number of weeks for merged PRs (1-4, default: 2)
+| Command             | What it does                            | Options                                  |
+| ------------------- | --------------------------------------- | ---------------------------------------- |
+| `open-prs`          | Check open PRs waiting for reviews      | None                                     |
+| `merged-prs`        | Check merged PRs from recent weeks      | `-w, --weeks <number>` (1-4, default: 1) |
+| `all`               | Run both open PRs and merged PRs checks | `-w, --weeks <number>` (1-4, default: 1) |
+| `executive-summary` | Generate AI-powered summary             | `-w, --weeks <number>` (1-4, default: 1) |
 
-## Example Output
+## Example outputs
 
-### Open PRs Message
+### Open PRs message
 
 ```
 🔍 Open PRs Waiting for Reviews (2)
 
 Add user authentication feature
 Repo: myorg/myapp (#123)
-Reviewers: john.doe, jane.smith
-Requested Reviewers: alice.brown
+Requested Reviewers: alice.brown, bob.wilson
 
 This PR adds OAuth2 authentication with Google and GitHub...
 
@@ -181,15 +172,14 @@ This PR adds OAuth2 authentication with Google and GitHub...
 
 Fix navigation bug in mobile view
 Repo: myorg/myapp (#124)
-Reviewers: No reviewers assigned yet
 
 Fixes the navigation menu not working properly on mobile devices...
 ```
 
-### Merged PRs Message
+### Merged PRs message
 
 ```
-📊 Weekly Summary - Last 2 Week(s)
+📊 Weekly Summary - Last 1 Week(s)
 3 PR(s) merged
 
 ---
@@ -207,56 +197,53 @@ Repo: myorg/myapp (#121) • Merged: Dec 12, 2024
 Updates the API documentation with new endpoints and examples...
 ```
 
-### Executive Summary Message
+### AI Executive Summary
 
 ```
-📊 Executive Summary
-Status Overview - Last 2 Week(s)
-• Open PRs: 2
-• Merged PRs: 3
+Here are open PR's last week. It's waiting on following reviews:
 
----
-
-Over the past two weeks, significant progress has been made on the authentication system and mobile navigation improvements. Three pull requests were successfully merged, including the implementation of OAuth2 authentication and mobile navigation bug fixes.
-
-Currently, there are two open pull requests awaiting review: a user authentication feature that has been assigned to john.doe and jane.smith, and a mobile navigation fix that still needs reviewer assignment. The authentication feature appears to be a substantial addition requiring careful review.
-
-**Action Items:**
-- The mobile navigation PR needs reviewer assignment to move forward
-- Consider prioritizing the authentication feature review given its complexity
+• FSA related fast follow updates, review it here <link to PR>
+• Add pre-commit hook for targeted Prettier formatting, review it here <link to PR>
+• Expose delete membership API, review it here <link to PR>
 ```
 
-## Configuration
+## Configuration settings
 
-### Environment Variables
+| Setting              | Description                                 | Required |
+| -------------------- | ------------------------------------------- | -------- |
+| `GITHUB_TOKEN`       | Your GitHub Personal Access Token           | Yes      |
+| `GITHUB_USERNAME`    | Your GitHub username                        | Yes      |
+| `SLACK_BOT_TOKEN`    | Your Slack Bot User OAuth Token             | Yes      |
+| `SLACK_CHANNEL_ID`   | The Slack channel where messages are posted | Yes      |
+| `CLAUDE_API_KEY`     | Your Claude API Key for AI summaries        | No       |
+| `DEFAULT_WEEKS_BACK` | Default weeks for merged PRs (default: 1)   | No       |
+| `MAX_WEEKS_BACK`     | Maximum weeks allowed (default: 4)          | No       |
 
-| Variable             | Description                               | Required |
-| -------------------- | ----------------------------------------- | -------- |
-| `GITHUB_TOKEN`       | GitHub Personal Access Token              | Yes      |
-| `GITHUB_USERNAME`    | Your GitHub username                      | Yes      |
-| `SLACK_BOT_TOKEN`    | Slack Bot User OAuth Token                | Yes      |
-| `SLACK_CHANNEL_ID`   | Slack Channel ID to post messages         | Yes      |
-| `CLAUDE_API_KEY`     | Claude API Key for AI summaries           | No       |
-| `DEFAULT_WEEKS_BACK` | Default weeks for merged PRs (default: 2) | No       |
-| `MAX_WEEKS_BACK`     | Maximum weeks allowed (default: 4)        | No       |
+## Common problems and solutions
 
-## Troubleshooting
+### GitHub API rate limit
 
-### Common Issues
+The tool respects GitHub's rate limits. If you hit limits, wait a few minutes and try again.
 
-1. **GitHub API Rate Limit**: The script respects GitHub's rate limits. If you hit limits, wait a few minutes and try again.
+### Slack permission error
 
-2. **Slack Permission Error**: Ensure your Slack bot has the correct permissions and is added to the target channel.
+Make sure your Slack bot has the correct permissions and is added to the target channel.
 
-3. **Repository Access**: Make sure your GitHub token has access to all repositories you want to track.
+### Repository access error
 
-4. **Channel ID Format**: Slack channel IDs should start with `C` (public channels) or `G` (private channels).
+Ensure your GitHub token has access to all repositories you want to track.
 
-5. **Claude API Error**: If you get Claude API errors, make sure your API key is valid and has sufficient credits.
+### Channel ID format error
 
-### Debug Mode
+Slack channel IDs should start with `C` (public channels) or `G` (private channels).
 
-To see more detailed logs, you can run the script with Node.js debug flags:
+### Claude API error
+
+If you get Claude API errors, make sure your API key is valid and has sufficient credits.
+
+### Debug mode
+
+To see detailed logs, run:
 
 ```bash
 DEBUG=* npm start open-prs

@@ -16,6 +16,7 @@ const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
 
 /**
  * Get all repositories for the authenticated user
+ * This fetches repositories you have access to, sorted by most recently updated
  */
 async function getUserRepositories() {
   try {
@@ -32,6 +33,7 @@ async function getUserRepositories() {
 
 /**
  * Get open PRs created by the user across all repositories
+ * This finds PRs you created that are still waiting for reviews
  */
 async function getOpenPRs() {
   try {
@@ -48,17 +50,18 @@ async function getOpenPRs() {
           per_page: 100,
         });
 
-        // Filter PRs created by the user
+        // Find PRs created by you
         const userPRs = prs.filter((pr) => pr.user.login === username);
 
         for (const pr of userPRs) {
-          // Get reviewers for each PR
+          // Get review information for each PR
           const { data: reviews } = await octokit.pulls.listReviews({
             owner: repo.owner.login,
             repo: repo.name,
             pull_number: pr.number,
           });
 
+          // Find reviewers who have already submitted reviews
           const reviewers = reviews
             .filter(
               (review) =>
@@ -96,6 +99,7 @@ async function getOpenPRs() {
 
 /**
  * Get merged PRs from the last N weeks
+ * This finds PRs you created that were merged within the specified time period
  */
 async function getMergedPRs(weeksBack) {
   try {
@@ -115,7 +119,7 @@ async function getMergedPRs(weeksBack) {
           per_page: 100,
         });
 
-        // Filter merged PRs created by the user within the time period
+        // Find merged PRs you created within the time period
         const userMergedPRs = prs.filter(
           (pr) =>
             pr.user.login === username &&
@@ -151,7 +155,8 @@ async function getMergedPRs(weeksBack) {
 }
 
 /**
- * Create Slack message for open PRs
+ * Create a Slack message showing open PRs waiting for reviews
+ * This formats the PR data into a readable Slack message with links
  */
 function createOpenPRsMessage(openPRs) {
   if (openPRs.length === 0) {
@@ -184,11 +189,13 @@ function createOpenPRsMessage(openPRs) {
   ];
 
   for (const pr of openPRs) {
+    // Only show reviewers if someone has actually reviewed
     const reviewersText =
       pr.reviewers.length > 0
         ? `*Reviewers:* ${pr.reviewers.join(', ')}\n`
         : '';
 
+    // Only show requested reviewers if someone was asked to review
     const requestedReviewersText =
       pr.requestedReviewers.length > 0
         ? `*Requested Reviewers:* ${pr.requestedReviewers.join(', ')}\n`
@@ -223,7 +230,8 @@ function createOpenPRsMessage(openPRs) {
 }
 
 /**
- * Create Slack message for merged PRs
+ * Create a Slack message showing merged PRs from recent weeks
+ * This formats the merged PR data into a readable Slack message
  */
 function createMergedPRsMessage(mergedPRs, weeksBack) {
   if (mergedPRs.length === 0) {
@@ -293,7 +301,8 @@ function createMergedPRsMessage(mergedPRs, weeksBack) {
 }
 
 /**
- * Send message to Slack
+ * Send a message to Slack
+ * This posts the formatted message to your configured Slack channel
  */
 async function sendSlackMessage(message) {
   try {
@@ -315,7 +324,8 @@ async function sendSlackMessage(message) {
 }
 
 /**
- * Check open PRs and send to Slack (Scenario #1)
+ * Check open PRs and send to Slack
+ * This fetches your open PRs and sends a formatted message to Slack
  */
 async function checkOpenPRs() {
   const openPRs = await getOpenPRs();
@@ -324,18 +334,20 @@ async function checkOpenPRs() {
 }
 
 /**
- * Check merged PRs and send to Slack (Scenario #2)
+ * Check merged PRs and send to Slack
+ * This fetches your merged PRs from the specified time period and sends a formatted message to Slack
  */
-async function checkMergedPRs(weeksBack = 2) {
+async function checkMergedPRs(weeksBack = 1) {
   const mergedPRs = await getMergedPRs(weeksBack);
   const message = createMergedPRsMessage(mergedPRs, weeksBack);
   await sendSlackMessage(message);
 }
 
 /**
- * Generate and send executive summary to Slack
+ * Generate and send an AI-powered executive summary to Slack
+ * This uses Claude AI to create a simple summary of your PR status and sends it to Slack
  */
-async function generateAndSendExecutiveSummary(weeksBack = 2) {
+async function generateAndSendExecutiveSummary(weeksBack = 1) {
   try {
     console.log('🤖 Generating executive summary with Claude AI...');
 

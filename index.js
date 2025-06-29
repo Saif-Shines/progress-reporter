@@ -97,8 +97,8 @@ program
   .description('Generate and send an AI-powered executive summary to Slack')
   .option(
     '-w, --weeks <number>',
-    'Number of weeks to look back for merged PRs (default: 2, max: 4)',
-    '2'
+    'Number of weeks to look back for merged PRs (default: 1, max: 4)',
+    '1'
   )
   .action(async (options) => {
     try {

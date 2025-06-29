@@ -26,9 +26,9 @@ async function testGitHubIntegration() {
     console.log(`Found ${openPRs.length} open PR(s)`);
 
     // Test merged PRs
-    console.log('📊 Fetching merged PRs from last 2 weeks...');
-    const mergedPRs = await getMergedPRs(2);
-    console.log(`Found ${mergedPRs.length} merged PR(s) in last 2 weeks`);
+    console.log('📊 Fetching merged PRs from last 1 week...');
+    const mergedPRs = await getMergedPRs(1);
+    console.log(`Found ${mergedPRs.length} merged PR(s) in last 1 week`);
 
     // Ask user for output preference
     console.log('\n📝 Choose your output format:');
@@ -41,7 +41,7 @@ async function testGitHubIntegration() {
       // Generate Claude summary
       console.log('\n🤖 Generating Claude AI executive summary...');
       try {
-        const summary = await generateExecutiveSummary(openPRs, mergedPRs, 2);
+        const summary = await generateExecutiveSummary(openPRs, mergedPRs, 1);
         console.log('\n📊 EXECUTIVE SUMMARY:');
         console.log('='.repeat(50));
         console.log(summary);
