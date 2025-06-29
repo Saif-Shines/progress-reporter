@@ -186,21 +186,23 @@ function createOpenPRsMessage(openPRs) {
   for (const pr of openPRs) {
     const reviewersText =
       pr.reviewers.length > 0
-        ? `*Reviewers:* ${pr.reviewers.join(', ')}`
-        : '*No reviewers assigned yet*';
+        ? `*Reviewers:* ${pr.reviewers.join(', ')}\n`
+        : '';
 
     const requestedReviewersText =
       pr.requestedReviewers.length > 0
-        ? `\n*Requested Reviewers:* ${pr.requestedReviewers.join(', ')}`
+        ? `*Requested Reviewers:* ${pr.requestedReviewers.join(', ')}\n`
         : '';
 
     blocks.push({
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*<${pr.url}|${pr.title}>*\n*Repo:* ${pr.repo} (#${
+        text: `*<${pr.url}|${pr.title}>*\n*Repo:* <https://github.com/${
+          pr.repo
+        }/pull/${pr.number}|${pr.repo}> (#${
           pr.number
-        })\n${reviewersText}${requestedReviewersText}\n\n${pr.description.substring(
+        })\n${reviewersText}${requestedReviewersText}\n${pr.description.substring(
           0,
           200
         )}${pr.description.length > 200 ? '...' : ''}`,
@@ -267,7 +269,9 @@ function createMergedPRsMessage(mergedPRs, weeksBack) {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*<${pr.url}|${pr.title}>*\n*Repo:* ${pr.repo} (#${
+        text: `*<${pr.url}|${pr.title}>*\n*Repo:* <https://github.com/${
+          pr.repo
+        }/pull/${pr.number}|${pr.repo}> (#${
           pr.number
         }) • *Merged:* ${mergedDate}\n\n${pr.description.substring(0, 200)}${
           pr.description.length > 200 ? '...' : ''

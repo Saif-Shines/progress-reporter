@@ -45,8 +45,12 @@ Please analyze the following GitHub data and create a concise, professional exec
 ${summaryData.openPRs
   .map(
     (pr) => `- ${pr.title} (${pr.repo} #${pr.number})
-  Reviewers: ${pr.reviewers.join(', ') || 'None assigned'}
-  Requested: ${pr.requestedReviewers.join(', ') || 'None'}
+  ${pr.reviewers.length > 0 ? `Reviewers: ${pr.reviewers.join(', ')}` : ''}
+  ${
+    pr.requestedReviewers.length > 0
+      ? `Requested: ${pr.requestedReviewers.join(', ')}`
+      : ''
+  }
   Description: ${pr.description.substring(0, 150)}${
       pr.description.length > 150 ? '...' : ''
     }`

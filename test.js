@@ -80,11 +80,13 @@ function displayRegularOutput(openPRs, mergedPRs) {
     console.log('\nOpen PRs:');
     openPRs.forEach((pr, index) => {
       console.log(`${index + 1}. ${pr.title}`);
-      console.log(`   Repo: ${pr.repo} (#${pr.number})`);
-      console.log(`   Reviewers: ${pr.reviewers.join(', ') || 'None'}`);
-      console.log(
-        `   Requested: ${pr.requestedReviewers.join(', ') || 'None'}`
-      );
+      console.log(`   Repo: https://github.com/${pr.repo}/pull/${pr.number}`);
+      if (pr.reviewers.length > 0) {
+        console.log(`   Reviewers: ${pr.reviewers.join(', ')}`);
+      }
+      if (pr.requestedReviewers.length > 0) {
+        console.log(`   Requested: ${pr.requestedReviewers.join(', ')}`);
+      }
       console.log('');
     });
   }
@@ -93,7 +95,7 @@ function displayRegularOutput(openPRs, mergedPRs) {
     console.log('\nMerged PRs:');
     mergedPRs.forEach((pr, index) => {
       console.log(`${index + 1}. ${pr.title}`);
-      console.log(`   Repo: ${pr.repo} (#${pr.number})`);
+      console.log(`   Repo: https://github.com/${pr.repo}/pull/${pr.number}`);
       console.log(`   Merged: ${pr.merged_at}`);
       console.log('');
     });
