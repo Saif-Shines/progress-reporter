@@ -68,11 +68,10 @@ ${summaryData.mergedPRs
   .join('\n')}
 
 **Instructions:**
-1. Create a casual executive summary (2-3 paragraphs max)
-2. Focus on listing the merged PRs, and list what's been done.
-3. Highlight any PRs pending review and on whom
-4. Use bullet points for easy scannability
-5. Leave links to the PRs for easy access (don't pollute)
+1. Create a casual executive summary (1 paragraph)
+2. List the data you got in bullet points. 
+3. Use bullet points for easy scannability
+4. Leave links to the PRs for easy access (don't pollute)
 
 **Format the response as a clean executive summary suitable for Slack.**`;
 
